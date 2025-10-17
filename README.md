@@ -10,12 +10,9 @@
 このリポジトリでは、YouTube チャンネルの**配信開始を自動検知**し、  
 指定した**Discord チャンネルへ通知を送る**システムを提供します。
 
-動作モードは 2 通りあります。
+**OBS 配信開始をトリガーに通知**（リアルタイム・推奨）
 
-1. **OBS 配信開始をトリガーに通知**（リアルタイム・推奨）
-2. **YouTube API を定期的にポーリングして通知**（15 分間隔・無料枠内）
-
-いずれの方式も、**限定配信を含む YouTube Live**を検知できます。  
+**限定配信を含む YouTube Live**を検知できます。  
 複数人で共有する場合も、`.env` ファイルを個別に設定することで同様に利用可能です。
 
 ---
@@ -119,25 +116,14 @@ OBS_PASSWORD=YOUR_OBS_PASSWORD
 
 ## ⚙️ 実行方法
 
-### ✅ リアルタイム通知モード（OBS 配信開始トリガー）
-
 ```bash
-python notify_on_obs_start.py
-```
-
-### ✅ 定期監視モード（無料枠・常駐不要）
-
-```bash
-python poll_youtube_live.py
+python main.py
 ```
 
 ---
 
 ## 🕓 自動起動設定（Windows 用）
 
-1. 「タスクスケジューラ」を起動
-2. トリガー → `obs64.exe` 起動時
-3. アクション → `python notify_on_obs_start.py` を登録
 
 ---
 
@@ -188,6 +174,36 @@ python-dotenv
 -   YouTube API の無料枠は **10,000 クォータ単位／日**
 -   `search.list` 1 回あたり 100 単位消費
 -   15 分間隔で運用すれば無料枠内
+
+---
+
+## 各種動作テスト
+
+OBS, Youtube, Discord に対してプログラムが正常に動作しているかを確認するためのテストコード
+
+### OBS 起動確認
+
+OBS の起動を検知できているか **obs.py**
+
+```bash
+python obs.py
+```
+
+### Youtube API 動作確認
+
+Youtube API を正常に実行でき、配信を取得できているか **youtube.py**
+
+```bash
+python obs.py
+```
+
+### Discord メッセージ確認
+
+Discord にメッセージを投稿できるか **discord.py**
+
+```bash
+python discord.py
+```
 
 ---
 
