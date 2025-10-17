@@ -49,6 +49,8 @@ python --version
 
 以下のコマンドを実行して、必要な Python ライブラリをインストールします。
 
+パッケージのインストールにおいて、黄色文字でエラーを吐く場合は `--no-warn-script-location` をコマンドの最後に追加することで、基本解決すると思われます。
+
 ```bash
 pip install google-api-python-client obs-websocket-py requests python-dotenv
 ```
