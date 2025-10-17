@@ -19,13 +19,13 @@
 
 ## 💻 対応環境
 
-| 項目       | 内容                                          |
-| ---------- | --------------------------------------------- |
-| OS         | Windows 11（推奨）                            |
-| Python     | 3.10 以上                                     |
-| OBS Studio | v29 以降（WebSocket 対応）                    |
-| YouTube    | 限定・公開どちらも対応（自分の API キー使用） |
-| Discord    | 任意のチャンネルに Webhook 投稿可             |
+| 項目          | 内容
+| ----------　　| --------------------------------------------
+| OS        　　| Windows 11（推奨）
+| Python    　　| 3.10 以上
+| OBS Studio　　| v29 以降（WebSocket 対応）
+| YouTube   　　| 限定・公開どちらも対応（自分の API キー使用）
+| Discord   　　| 任意のチャンネルに Webhook 投稿可
 
 ---
 
@@ -124,6 +124,33 @@ python main.py
 
 ## 🕓 自動起動設定（Windows 用）
 
+OBS起動時の自動実行を行うためにタスクスケジューラの設定を行います。
+
+以下の記事を参考にタスクスケジューラでSecurityが選択できるように設定を行ってください。
+
+[タスクスケジューラの設定](https://aki0018.hatenablog.jp/entry/2020/07/03/035449)
+
+1. タスクを新規作成し、「トリガー」 タブを選択
+2. 「トリガー」を「イベント時」に設定し、「カスタム」を選択する
+3. 「イベントフィルターの編集」 → 「XML」タブを開く
+4. 下記内容を記入 **OBS.exeの保存場所が違う場合は Data を編集**
+
+```bash
+<QueryList>
+  <Query Id="0" Path="Security">
+    <Select Path="Security">
+      *[System[(EventID=4688)]]
+      and
+      *[EventData[Data[@Name='NewProcessName'] and (Data='C:\ProgramFiles\obs-studio\bin\64bit\obs64.exe')]]
+    </Select>
+  </Query>
+</QueryList>
+```
+
+5. 「操作」タブを選択 「プログラムの開始」を選択し、**main.py** へのフルパスを指定する
+6. OK を押しタスクを保存
+
+これで、OBSが起動したときに python プログラムが実行される。
 
 ---
 
@@ -143,10 +170,11 @@ Webhook を設定したチャンネルに通知が届けば成功。
 
 ```
 youtube-live-notifier/
-├── notify_on_obs_start.py
-├── poll_youtube_live.py
+├── main.py
 ├── .env
 ├── requirements.txt
+├── credentials.json
+├── token.json
 └── README.md
 ```
 
