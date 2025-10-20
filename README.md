@@ -31,6 +31,32 @@
 
 ## 🚀 セットアップ手順（初回のみ）
 
+### プログラムのダウンロード
+
+左上にある緑色の `<>code` から リポジトリのクローン または zip のダウンロードを行ってください。
+
+### 🧩 ファイルの配置とパス指定に関する注意
+
+✅ OKな例
+
+```bash
+C:\aaa\bbb\streammanage
+```
+
+❌ NGな例（日本語フォルダ名を含む場合）
+
+```bash
+C:\aaa\あああ\streammanage
+```
+
+⚠️ 日本語パスが含まれていると、PythonやOBS WebSocketが
+正常に動作しないことがあります。
+**半角英数字のみのフォルダ名**を使用してください。
+
+(`main.py` 内のyoutube api に関するパス指定をフルパスにする場合、
+文字列の前に r を付けることでエスケープエラーを防ぎます。)
+(`path = r"C:\aaa\bbb\streammanage\main.py"`)
+
 ### 1️⃣ Python の導入
 
 1. [Python 公式サイト](https://www.python.org/downloads/windows/) にアクセス
@@ -49,10 +75,10 @@ python --version
 
 以下のコマンドを実行して、必要な Python ライブラリをインストールします。
 
-パッケージのインストールにおいて、黄色文字でエラーを吐く場合は `--no-warn-script-location` をコマンドの最後に追加することで、基本解決すると思われます。
+パッケージのインストールにおいて、黄色文字でエラーを吐く場合は `--no-warn-script-location` を末尾に追加することで、基本解決すると思われます。
 
 ```bash
-pip install google-api-python-client obs-websocket-py requests python-dotenv
+pip install google-api-python-client google-auth-oauthlib obs-websocket-py requests python-dotenv
 ```
 
 または、リポジトリの `requirements.txt` を利用する場合は：
@@ -61,13 +87,25 @@ pip install google-api-python-client obs-websocket-py requests python-dotenv
 pip install -r requirements.txt
 ```
 
+#### pip が利用できない場合
+
+pip が利用できない場合はコマンドを以下のように変更してください
+
+```bash
+python -m pip install google-api-python-client google-auth-oauthlib obs-websocket-py requests python-dotenv
+
+python -m pip install -r requirements.txt
+```
+
+リポジトリの`requirements.txt`を利用する場合は`requirements.txt` がある場所で動作させてください。
+
 ---
 
 ### 3️⃣ `.env` ファイルの作成
 
 このリポジトリのルートディレクトリに `.env` ファイルを作成し、以下のように記述してください。
 
-```env
+```.env
 # YouTube API設定
 YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
 YOUTUBE_CHANNEL_ID=YOUR_CHANNEL_ID
@@ -116,11 +154,54 @@ OBS_PASSWORD=YOUR_OBS_PASSWORD
 
 ---
 
+
+## 🧪 各種動作確認手順
+
+OBS, Youtube, Discord に対してプログラムが正常に動作しているかを確認するためのテストコード
+
+### ✅ OBS 起動確認
+
+OBS の起動を検知できているか **obs.py**
+`obs.py` を実行した状態で OBS を起動し、OBS検知の文言がでれば成功。
+
+```bash
+python obs.py
+```
+
+### ✅ YouTube 動作確認
+
+Youtube API を正常に実行でき、配信を取得できているか **youtube.py**
+`youtube.py` を実行し、OAth 認証ができること & ライブ配信や過去の配信データが取得できていれば成功。
+**`youtube.py` の初回起動時に 配信を行うプロファイルでブラウザ認証を行う必要あり**
+
+```bash
+python youtube.py
+```
+
+### ✅ Discord メッセージ確認
+
+Discord にメッセージを投稿できるか **discord.py**
+Webhook を設定したチャンネルに通知が届けば成功。
+
+```bash
+python discord.py
+```
+
+---
+
 ## ⚙️ 実行方法
 
 ```bash
 python main.py
 ```
+
+> 実行前に `youtube.py` を一度実行して、 Google認証情報 (token.json) を作成しておく必要があります。
+
+```bash
+python youtube.py
+```
+
+`youtube.py` 実行時に認証画面が表示されるので、YouTube 配信を行うプロファイルで認証を完了させてください。
 
 ---
 
@@ -149,22 +230,10 @@ OBS起動時の自動実行を行うためにタスクスケジューラの設�
 </QueryList>
 ```
 
-5. 「操作」タブを選択 「プログラムの開始」を選択し、**main.py** へのフルパスを指定する
+5. 「操作」タブを選択 新規作成からトリガー 「プログラムの開始」を選択し、実行するプログラムは **`main.py` へのフルパスを指定**する
 6. OK を押しタスクを保存
 
 これで、OBSが起動したときに python プログラムが実行される。
-
----
-
-## 🧪 動作確認手順
-
-### ✅ YouTube 側
-
-限定公開または公開で配信を開始し、`.env` のチャンネル ID が正しいか確認。
-
-### ✅ Discord 側
-
-Webhook を設定したチャンネルに通知が届けば成功。
 
 ---
 
@@ -185,10 +254,11 @@ youtube-live-notifier/
 ## 🧰 requirements.txt
 
 ```txt
-google-api-python-client
-obs-websocket-py
-requests
-python-dotenv
+google-api-python-client==2.184.0
+obs-websocket-py==1.0
+requests==2.32.5
+python-dotenv==1.1.1
+google-auth-oauthlib==1.2.1
 ```
 
 ---
@@ -204,45 +274,6 @@ python-dotenv
 -   YouTube API の無料枠は **10,000 クォータ単位／日**
 -   `search.list` 1 回あたり 100 単位消費
 -   15 分間隔で運用すれば無料枠内
-
----
-
-## 各種動作テスト
-
-OBS, Youtube, Discord に対してプログラムが正常に動作しているかを確認するためのテストコード
-
-### OBS 起動確認
-
-OBS の起動を検知できているか **obs.py**
-
-```bash
-python obs.py
-```
-
-### Youtube API 動作確認
-
-Youtube API を正常に実行でき、配信を取得できているか **youtube.py**
-
-```bash
-python obs.py
-```
-
-### Discord メッセージ確認
-
-Discord にメッセージを投稿できるか **discord.py**
-
-```bash
-python discord.py
-```
-
----
-
-## 🧩 拡張予定
-
--   Discord Embed 対応
--   OBS ホットキー通知
--   Push 通知（PubSubHubbub）
--   GUI 化
 
 ---
 
